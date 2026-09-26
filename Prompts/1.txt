@@ -1,0 +1,82 @@
+We are building a serious AI-for-science project called "Eelgrass Intelligence".
+
+PROJECT CONTEXT
+----------------
+
+This project is being developed around a real potential collaboration with CERI (Coastal Ecology and Restoration Institute).
+
+CERI has a large collection of labelled and unlabelled eelgrass and seafloor imagery. Their stated research interest is exploring machine learning to automate:
+
+1. eelgrass presence/absence detection
+2. percentage cover estimation
+3. cover-type classification
+
+Their previous ML work stalled because of funding limitations, so we want to explore whether we can build a useful and technically rigorous system around this real research need.
+
+IMPORTANT:
+We do NOT yet have the CERI dataset or complete information about its annotation structure.
+
+Therefore, we must NOT assume:
+- what constitutes a sample
+- whether labels are image-level, bounding boxes, polygons, or segmentation masks
+- whether percentage cover is already labelled
+- what "cover type" means
+- what classes exist
+- how images are grouped by site/transect/date
+- how the previous ML work was performed
+
+We will first obtain this information from CERI and perform a data audit before deciding the final ML formulation.
+
+PROJECT GOALS
+-------------
+
+This should eventually become both:
+
+1. A genuinely useful, easy-to-use scientific tool for CERI researchers.
+2. A technically strong AI/Product Engineering portfolio project.
+
+The eventual system should demonstrate skills including:
+
+- Python
+- computer vision / machine learning
+- scientific data processing
+- rigorous ML evaluation
+- FastAPI/backend engineering
+- database and data modeling
+- model inference/serving
+- Docker
+- testing
+- observability
+- deployment
+- performance engineering
+- human-in-the-loop workflows
+- potentially LLM agents and MCP where they provide genuine value
+
+However, we will NOT build all of these at once.
+
+ENGINEERING PRINCIPLES
+----------------------
+
+1. Scientific correctness before UI polish.
+2. Reproducibility is important.
+3. Never make assumptions about CERI's data when the answer is unknown.
+4. Avoid premature complexity.
+5. Production/application logic belongs in the Python package, not notebooks.
+6. Notebooks are for exploration only.
+7. We want a clean, testable, maintainable architecture.
+8. Every major architectural decision should be explainable.
+9. The final product should be simple for a researcher to use even if the underlying system is technically sophisticated.
+10. We should build incrementally and validate each layer before adding the next.
+
+CURRENT STAGE
+-------------
+
+We are at Step 1.
+
+We are ONLY creating the initial repository scaffolding.
+
+We are NOT implementing machine learning yet.
+
+Do not invent a dataset, labels, model architecture, or CERI workflow.
+
+I am also learning AI and software engineering through this project, so when making architectural decisions, explain the reasoning rather than simply generating code.

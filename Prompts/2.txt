@@ -1,0 +1,82 @@
+We are now implementing Step 1 of Eelgrass Intelligence.
+
+Create ONLY the initial repository scaffolding.
+
+Requirements:
+
+Project name:
+eelgrass-intelligence
+
+Create:
+
+README.md
+pyproject.toml
+.env.example
+.gitignore
+
+docs/
+  architecture.md
+  data_questions_for_ceri.md
+  decisions/
+
+data/
+  raw/.gitkeep
+  interim/.gitkeep
+  processed/.gitkeep
+
+notebooks/
+
+src/
+  eelgrass_intelligence/
+    __init__.py
+
+tests/
+  unit/
+  integration/
+
+configs/
+scripts/
+
+Do NOT create:
+- ML code
+- models
+- API
+- frontend
+- database
+- Docker configuration
+- DVC configuration
+- MLflow configuration
+- deployment configuration
+
+We are intentionally keeping Step 1 small.
+
+The README should explain:
+1. What Eelgrass Intelligence is
+2. The scientific problem it is intended to address
+3. The current project status
+4. The principle that we must not make assumptions about CERI's dataset or label schema
+5. The planned high-level architecture
+
+The pyproject.toml should define a clean Python package named eelgrass-intelligence and use a modern src-layout.
+
+Add only the minimum development dependencies needed at this stage for:
+- pytest
+- ruff
+- mypy
+
+Do not add PyTorch, FastAPI, MLflow, DVC, PostgreSQL, React, or other application dependencies yet.
+
+Also create an initial architecture.md explaining the four conceptual layers:
+
+1. Data
+2. Data processing/validation
+3. ML
+4. Serving/product
+
+Do not invent any CERI-specific label definitions.
+
+After creating the files:
+1. Show me the resulting directory tree.
+2. Explain every file you created.
+3. Show me the important parts of pyproject.toml.
+4. Do not run any destructive commands.
