@@ -1,0 +1,49 @@
+# cover_classes.example.toml
+#
+# ILLUSTRATIVE EXAMPLE ONLY. This file does NOT represent CERI's real
+# cover-type taxonomy. CERI's actual classes, and whether cover types are
+# mutually exclusive or can co-occur, are not yet known — see
+# docs/data_questions_for_ceri.md, "About cover-type".
+#
+# This file exists so the project's class registry (see
+# src/eelgrass_intelligence/classes.py) and segmentation-mask handling
+# (see src/eelgrass_intelligence/masks.py) can be developed and tested
+# before CERI's real taxonomy is confirmed. It is used by synthetic,
+# locally generated images only (see scripts/sample_data/), never by real
+# CERI imagery.
+#
+# See docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md
+# for why segmentation and class masks are being used at all at this
+# stage, and why that choice is provisional and reversible.
+#
+# --- Reserved values (not listed below, added automatically) ---
+#
+# Every class registry automatically includes two reserved classes, which
+# must never be redefined here:
+#
+#   - "invalid" (ID 0): the pixel should not be counted in any
+#     calculation at all (for example: corrupted image data, or outside
+#     the photographed area).
+#   - "unclassified" (ID 1): the pixel is valid image data, but no
+#     confident class could be assigned to it.
+#
+# --- ID rules for real classes (the [classes] table below) ---
+#
+#   - Every real class must use a whole-number ID of 2 or higher. IDs 0
+#     and 1 are permanently reserved for "invalid" and "unclassified" and
+#     cannot be reused.
+#   - Every real class ID must be unique.
+#   - Every real class name must be unique, and must not be "invalid" or
+#     "unclassified".
+#   - A registry must define at least one real class.
+#
+# IDs do not need to be sequential or start at 2 — gaps are fine (e.g.
+# 2, 5, 10) — but staying sequential is easier to read and is used below
+# purely as a convention, not a rule.
+
+[classes]
+# Example-only illustrative classes. Names and IDs below are placeholders
+# for development and testing, and are not CERI-provided categories.
+example_eelgrass = 2
+example_bare_substrate = 3
+example_other_vegetation = 4

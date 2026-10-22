@@ -1,10 +1,13 @@
 # Project Workflow
 
 This document describes the proposed end-to-end workflow for Eelgrass
-Intelligence, from raw imagery arriving from CERI through to researchers
-acting on model predictions. It stays at the conceptual level: no code,
-tooling, libraries, or model architectures are named here, and nothing below
-assumes facts about CERI's dataset that have not yet been confirmed (see
+Intelligence, from imagery or survey video entering the system through to
+researcher/reviewer action on results. It covers both CERI's existing
+labelled/unlabelled photos and the community-survey product direction
+(video upload → extracted frames → analysis → human review → heatmap and
+export). It stays at the conceptual level: no code, tooling, libraries, or
+model architectures are named here, and nothing below assumes facts about
+CERI's dataset that have not yet been confirmed (see
 `data_questions_for_ceri.md`).
 
 Every stage description below is marked with a status:
@@ -54,26 +57,49 @@ see Stage 7 for that distinction.
 **Status: Proposed**, within the confirmed principle that raw data is
 immutable (`architecture.md`, Layer 1).
 
-**Purpose:** Bring CERI's imagery and labels into the project in a
-consistent, traceable way, without altering the originals.
+**Purpose:** Bring imagery, video, and labels into the project in a
+consistent, traceable way, without altering the originals. Two kinds of
+input are now in scope: CERI's existing labelled/unlabelled photos, and
+newly uploaded underwater survey video from the community-survey product
+direction.
 
-**Expected inputs:** Raw image files and whatever label files or records
-accompany them, as provided by CERI, plus any available metadata (e.g. site,
-date, depth — see open questions below).
+**Expected inputs:**
 
-**Expected outputs:** An unmodified, versioned copy of the raw data,
-alongside a record of *when* and *from where* each batch was ingested.
+- CERI's existing imagery and whatever label files or records accompany
+  it (reportedly image-level percentage-cover estimates and/or categories
+  such as rocky/sandy/algae/unclear — preliminary and unconfirmed, see
+  "Open questions" below).
+- Newly uploaded underwater survey video, for the community-survey
+  workflow.
+- Any available geographic or survey metadata (site, date, depth,
+  coordinates, survey/transect identifier), associated with the upload
+  when provided.
+
+**Expected outputs:** An unmodified, versioned copy of the raw data
+(photos and/or source video), alongside a record of *when* and *from
+where* each batch or upload was ingested, and whatever metadata
+accompanied it.
 
 **Considerations:**
 
 - Raw data should never be edited in place; anything derived from it must be
-  regenerable, per the Layer 1 principle in `architecture.md`.
+  regenerable, per the Layer 1 principle in `architecture.md`. This applies
+  to uploaded video exactly as it applies to CERI's photos — the source
+  video itself must remain intact and traceable even after frames are
+  extracted from it (Stage 2).
 - Ingestion should tolerate incremental delivery — CERI may send data in
-  batches over time rather than as one complete set.
-- **Open questions blocking real design here:** what a single "sample" is,
-  the capture protocol, image format/resolution, available metadata, total
-  volume, and any data-sharing or sensitive-location constraints. See the
-  "About the imagery" section of `data_questions_for_ceri.md`.
+  batches over time, and community users may upload video at any time,
+  rather than everything arriving as one complete set.
+- Geographic and survey metadata should be captured when the uploader
+  provides it, but must not be required or fabricated when it isn't —
+  CERI's exact metadata schema is not yet confirmed.
+- **Open questions blocking full design here:** what a single CERI
+  "sample" is, the capture protocol, image format/resolution, available
+  metadata, total volume, and any data-sharing or sensitive-location
+  constraints. See the "About the imagery" section of
+  `data_questions_for_ceri.md`. (CERI has since shared *preliminary*
+  figures — roughly 6,000 labelled and 20,000–30,000+ unlabelled photos —
+  but the exact label schema and metadata structure remain unconfirmed.)
 
 ## Stage 2 — Data validation and quality checks
 
@@ -82,13 +108,17 @@ fail loudly on bad data rather than let it propagate (`architecture.md`,
 Layer 2).
 
 **Purpose:** Confirm that ingested data actually matches an agreed schema
-before anything downstream trusts it.
+before anything downstream trusts it, and — for video — turn uploaded
+footage into a validated set of timestamped frames.
 
-**Expected inputs:** Raw ingested data from Stage 1.
+**Expected inputs:** Raw ingested data from Stage 1 (photos and/or source
+video with metadata).
 
 **Expected outputs:** Either a validated dataset that later stages can rely
 on, or an explicit rejection/report identifying what failed validation and
-why.
+why. For video input specifically: a set of extracted frames (approximately
+one per second), each one linked back to its source video and its exact
+timestamp within that video.
 
 **Considerations:**
 
@@ -96,13 +126,20 @@ why.
   images), presence of expected metadata fields, label files that
   reference image files correctly, and labels that conform to an agreed
   format.
-- This stage cannot be meaningfully designed until CERI's label format and
-  schema are known — see the "About label format and tooling" section of
-  `data_questions_for_ceri.md`.
+- For video: frame extraction must retain the source video unmodified and
+  must record each frame's timestamp accurately, so a frame can always be
+  traced back to its exact moment in the original footage. This part of
+  the stage does not depend on CERI's label schema and can be built and
+  tested independently (e.g. against synthetic or openly-licensed video).
+- This stage's label-related checks cannot be meaningfully designed until
+  CERI's label format and schema are known — see the "About label format
+  and tooling" section of `data_questions_for_ceri.md`.
 - Any quality control or inter-annotator agreement information CERI can
   share would inform whether additional trust-related checks are needed
   here (e.g. flagging low-agreement labels rather than rejecting them
-  outright).
+  outright) — CERI has reported that many photos were assessed by at
+  least three student reviewers, but how disagreement among them is
+  resolved is not yet confirmed.
 
 ## Stage 3 — Exploratory data analysis
 
@@ -182,6 +219,14 @@ it is reproducible.
   the same site, transect, or survey day) to avoid leakage — but whether
   such grouping exists, and at what granularity, is an open question (see
   "About structure and evaluation" in `data_questions_for_ceri.md`).
+- This matters even more with video-derived frames than with independently
+  captured photos: frames extracted roughly one second apart from the same
+  video are often nearly identical. A random, image-level split can easily
+  place near-duplicate frames from the same moment on both the training
+  and test side, which would make the model look far more accurate than it
+  really is. Splits must be constructed by independent survey group,
+  transect, or site wherever that metadata is available — never by
+  randomly splitting individual frames or images alone.
 - Class balance findings from Stage 3 may inform how splits are
   constructed, but preserving meaningful separation between groups and
   preventing leakage (e.g. across site, transect, or survey day) takes
@@ -193,9 +238,18 @@ it is reproducible.
 ## Stage 6 — Model training
 
 **Status: Confirmed requirement** (versioned, reproducible experiments —
-`architecture.md`, Layer 3). **No architecture or technique choices are
-proposed here** — those depend on task formulation, which depends on label
-structure, which is unknown.
+`architecture.md`, Layer 3). **No architecture or technique choice is
+confirmed here** — those depend on task formulation, which depends on label
+structure, which is unknown. `architecture.md` Layer 3 lists candidate
+approaches to evaluate once real labelled data is available (percentage-
+cover regression, image-level classification, and — only if suitable
+pixel-level annotations or a defensible annotation plan exist —
+segmentation); none is presumed primary. For development purposes only,
+segmentation is additionally being used as a provisional, reversible
+pipeline-testing scaffold — see
+`docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`.
+This does not change the "must not be guessed" principle above; it is
+scaffolding to allow pipeline work to proceed before CERI's answers arrive.
 
 **Purpose:** Fit a model to the training data for a given task.
 
@@ -275,13 +329,21 @@ new imagery — `README.md`, `architecture.md`, Layer 4). **Proposed
 mechanics.**
 
 **Purpose:** Apply an accepted, evaluated model to imagery it hasn't seen
-before, producing predictions a researcher can use.
+before (including frames extracted from newly uploaded survey video),
+producing results a researcher or community surveyor can use. **Until a
+model has been accepted per Stage 7, this stage must not run, and the
+product must not claim to perform real eelgrass detection or cover
+estimation** — any demonstration before that point must use clearly
+labeled synthetic or placeholder output only (see
+`docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`).
 
-**Expected inputs:** New images (individually or in batches) and an
-accepted trained model from Stage 7.
+**Expected inputs:** New images or extracted video frames (individually or
+in batches) and an accepted trained model from Stage 7.
 
-**Expected outputs:** Predictions for each image (per task), presented in a
-form a non-ML researcher can interpret directly.
+**Expected outputs:** A result for each image/frame (per task), presented
+in a form a non-ML researcher can interpret directly, and tagged with its
+method/source so it can never be confused with a human-reviewed or
+synthetic result (same discipline as Stage 9's output).
 
 **Considerations:**
 
@@ -299,20 +361,27 @@ form a non-ML researcher can interpret directly.
 
 **Status: Proposed.** Not yet discussed in existing docs, but implied by
 the project's stated goal of being genuinely usable by CERI researchers
-(`README.md`, Section 1).
+(`README.md`, Section 1) and by the community-survey product direction's
+requirement for human review of automated results.
 
-**Purpose:** Give CERI researchers a way to review model predictions
-against their own expertise, and capture their judgment in a form that can
-improve the system over time — closing the loop rather than treating
+**Purpose:** Give a researcher or community reviewer a way to check
+automated (or, before any model exists, synthetic/placeholder) results
+against their own judgment, correct them, and capture that judgment in a
+form that can improve the system over time and feed downstream
+presentation (heatmap, export) — closing the loop rather than treating
 inference as the final step.
 
-**Expected inputs:** Predictions from Stage 8, reviewed by a researcher.
+**Expected inputs:** Per-image/per-frame results from Stage 8 (or
+synthetic/placeholder results, clearly labeled as such, before any model
+exists), reviewed by a person.
 
 **Expected outputs:** Structured feedback — e.g. confirming, correcting, or
-flagging predictions — that can feed back into: refining how predictions
-are presented (back to Stage 8), a future training iteration (back to
-Stage 6), or a realization that different/additional data is needed (back
-to Stage 1).
+flagging results — recorded with its method and source (human review vs.
+automated vs. synthetic placeholder), that can feed back into: refining how
+results are presented (back to Stage 8), a future training iteration (back
+to Stage 6), a realization that different/additional data is needed (back
+to Stage 1), or forward into a heatmap/export view (Stage 8's downstream
+presentation) that must inherit the same source labeling.
 
 **Considerations:**
 
@@ -320,6 +389,11 @@ to Stage 1).
   way rather than informal one-off comments — but what "structured" means
   here should be designed with CERI, since it depends on how researchers
   actually want to work.
+- A heatmap or exported results view built from this stage's data must
+  never blur human-reviewed, automated, and synthetic/placeholder results
+  together — each displayed or exported value must remain traceable to
+  its method and source, per
+  `docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`.
 - This is a natural point to surface model uncertainty or low-confidence
   predictions specifically for review, rather than presenting every
   prediction with equal confidence — though this is a design idea, not a

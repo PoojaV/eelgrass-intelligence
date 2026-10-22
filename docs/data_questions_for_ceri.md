@@ -5,6 +5,17 @@ decisions about data pipelines, label schemas, or model formulation. Nothing
 in this project should assume answers to these questions — they should be
 confirmed directly with CERI and this document updated accordingly.
 
+**Note (preliminary information received):** CERI has reported roughly
+6,000 photos labelled at least once, and 20,000–30,000+ unlabelled photos;
+that existing labels reportedly include an estimated eelgrass percentage
+cover and/or a category such as rocky, sandy, algae, or unclear; and that
+many photos have assessments from at least three student reviewers. These
+are preliminary figures, not a confirmed dataset schema — most of the
+specific questions below (exact sample definition, label format, whether
+categories are mutually exclusive, how multi-reviewer disagreement is
+resolved, grouping/metadata structure) remain open and are not answered by
+this note.
+
 ## About the imagery
 
 - What is a single labelled "sample"? (a full image, a quadrat photo, a
@@ -59,6 +70,25 @@ confirmed directly with CERI and this document updated accordingly.
   leakage.)
 - What is the class balance for each task, roughly? (e.g. how rare is
   eelgrass presence, how rare are minority cover types)
+- Were any of CERI's existing photos extracted from video? If so, at what
+  interval, and is there a way to identify which photos came from the same
+  video/survey, so splits can group them rather than split them apart (see
+  the adjacent-frame leakage risk noted in `docs/project_workflow.md`,
+  Stage 5)?
+
+## About survey and geographic metadata (community-survey direction)
+
+- What geographic/location metadata, if any, should be captured per
+  survey or per video upload (e.g. coordinates, site name), and are there
+  sensitive-location constraints on storing or displaying it (see "About
+  the imagery" above)?
+- What constitutes a single "survey" for grouping purposes — one video
+  upload, one outing, one site visit? This affects both leakage-aware
+  splitting (Stage 5) and how results are grouped for review/export
+  (Stage 9).
+- Does CERI have requirements for how community-submitted surveys (as
+  opposed to CERI's own labelled photos) should be handled, reviewed, or
+  trusted differently?
 
 ## About intended use
 
