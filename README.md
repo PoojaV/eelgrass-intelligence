@@ -30,15 +30,40 @@ analysis and less time on manual image review.
 
 ## 3. Current project status
 
-**Step 1 — repository scaffolding.** No machine learning code, models, API,
-frontend, database, or deployment configuration exists yet. This step only
-establishes the project's directory structure, package layout, and baseline
-developer tooling (`pytest`, `ruff`, `mypy`).
+**Step 1 — repository scaffolding** is complete: directory structure,
+package layout, and baseline developer tooling (`pytest`, `ruff`, `mypy`).
 
-No data has been received from CERI yet, and no dataset- or label-related
-decisions have been made. See `docs/data_questions_for_ceri.md` for the list
-of open questions that must be answered before any data pipeline or model
-work begins.
+Since then, two early ingestion/scaffolding capabilities have been built
+and are tested:
+
+- A configurable class registry and segmentation-mask representation
+  (`src/eelgrass_intelligence/classes.py`, `masks.py`) — provisional
+  development scaffolding, not a confirmed modeling approach. See
+  `docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`.
+- Video frame extraction (`src/eelgrass_intelligence/video_frames.py`): a
+  reusable function and command-line tool that extracts still frames from
+  a local video file at a configurable interval (default: one per
+  second), with a traceability manifest. See "Extracting frames from a
+  video," below.
+
+**No eelgrass classification, percentage-cover prediction, or trained
+model of any kind exists or is validated yet.** No API, frontend,
+database, or deployment configuration exists. No CERI dataset has been
+received or integrated — frame extraction has only been built and tested
+against small, synthetic videos generated locally. See
+`docs/data_questions_for_ceri.md` for the list of open questions that must
+be answered before any real data pipeline or model work begins.
+
+### Extracting frames from a video
+
+```bash
+extract-frames path/to/survey_video.mp4 --output data/interim/my_survey_frames
+```
+
+This writes one image per extracted interval (default: 1 per second) plus
+a `manifest.json` recording exactly how they were produced — see
+`docs/architecture.md`, Layer 1/2, for details and current limitations.
+Run `extract-frames --help` for all options.
 
 ## 4. Principle: no assumptions about CERI's data or label schema
 

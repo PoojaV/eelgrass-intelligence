@@ -68,6 +68,21 @@ handling, however, do not depend on CERI's label schema, so that part can
 be developed and tested independently (including against synthetic or
 openly-licensed video), without waiting for CERI's answers.
 
+**Implemented:** `src/eelgrass_intelligence/video_frames.py` extracts
+frames from a local video file at a configurable interval (default: one
+per second), using each decoded frame's own reported timestamp rather
+than assuming a constant frame rate — see that module's docstring for the
+reasoning and for its documented timestamp-accuracy limitation on
+variable-frame-rate video. Each run produces a JSON manifest recording
+the source video's filename, size, and SHA-256 checksum; the interval
+used; and every extracted frame's index, filename, and timestamp (in
+both seconds and milliseconds). The manifest never includes survey
+identifiers, coordinates, dates, labels, or other environmental
+metadata — those are out of scope for this ingestion step and must come
+from a separately validated interface if and when they exist. This has
+been tested only against small, synthetic videos generated locally; it
+has not yet been run against any real CERI or community-submitted video.
+
 ## Layer 3 — ML
 
 Training, evaluation, and experiment tracking for the three research tasks:
@@ -155,9 +170,19 @@ Principles for this layer:
 ## Status
 
 As of Step 1, only the repository structure existed; no functional code was
-written yet. Since then, a class registry and segmentation-mask
-representation (Layer 3 scaffolding, provisional — see
-`docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`)
-have been implemented and tested. Layer 1 cannot be finalized until CERI's
-dataset, label schema, and survey metadata are understood; layers 2–4
-depend on Layer 1. No model, API, frontend, or database exists yet.
+written yet. Since then:
+
+- A class registry and segmentation-mask representation (Layer 3
+  scaffolding, provisional — see
+  `docs/decisions/0001-segmentation-as-provisional-working-hypothesis.md`)
+  have been implemented and tested.
+- Video frame extraction (Layer 1/2, see above) has been implemented and
+  tested against small, locally generated synthetic videos only.
+
+**No eelgrass classification or percentage-cover prediction model has
+been implemented, trained, or validated.** Segmentation remains
+provisional scaffolding, not an adopted modeling approach. No CERI
+dataset has been integrated. Layer 1 cannot be finalized until CERI's
+dataset, label schema, and survey metadata are understood. Location-aware
+heatmaps and a user-facing upload interface (Layer 4) remain future,
+unbuilt capabilities. No model, API, frontend, or database exists yet.

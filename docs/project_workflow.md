@@ -103,9 +103,13 @@ accompanied it.
 
 ## Stage 2 — Data validation and quality checks
 
-**Status: Proposed**, within the confirmed principle that this layer must
-fail loudly on bad data rather than let it propagate (`architecture.md`,
-Layer 2).
+**Status: Proposed** for CERI-labelled-data validation, within the
+confirmed principle that this layer must fail loudly on bad data rather
+than let it propagate (`architecture.md`, Layer 2). **Video frame
+extraction specifically is implemented and tested** (see
+`src/eelgrass_intelligence/video_frames.py`), but only against small,
+locally generated synthetic videos — not yet run against any real CERI or
+community-submitted video.
 
 **Purpose:** Confirm that ingested data actually matches an agreed schema
 before anything downstream trusts it, and — for video — turn uploaded
@@ -129,8 +133,12 @@ timestamp within that video.
 - For video: frame extraction must retain the source video unmodified and
   must record each frame's timestamp accurately, so a frame can always be
   traced back to its exact moment in the original footage. This part of
-  the stage does not depend on CERI's label schema and can be built and
-  tested independently (e.g. against synthetic or openly-licensed video).
+  the stage does not depend on CERI's label schema and has been built and
+  tested independently, against small synthetic videos (see
+  `src/eelgrass_intelligence/video_frames.py`); it has not yet been
+  exercised against real survey footage, and timestamp accuracy on
+  unusual variable-frame-rate video is a documented, untested limitation
+  of the underlying decoder.
 - This stage's label-related checks cannot be meaningfully designed until
   CERI's label format and schema are known — see the "About label format
   and tooling" section of `data_questions_for_ceri.md`.
